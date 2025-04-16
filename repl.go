@@ -5,9 +5,16 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"github.com/Khazz0r/pokedex/internal/pokeapi"
 )
 
-func startRepl() {
+type config struct {
+	pokeapiClient pokeapi.Client
+	nextLocationsURL *string
+	prevLocationsURL *string
+}
+
+func startRepl(cfg *config) {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
@@ -22,7 +29,11 @@ func startRepl() {
 		}
 
 		if command, ok := getCommandRegistry()[cleaned_input[0]]; ok {
-			command.callback()
+			err := command.callback(cfg)
+			if err != nil {
+				fmt.Println(err)
+			}
+			continue
 		} else {
 			fmt.Println("Unknown command")
 			continue
@@ -40,7 +51,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(*config) error
 }
 
 func getCommandRegistry() map[string]cliCommand {
@@ -54,6 +65,16 @@ func getCommandRegistry() map[string]cliCommand {
 			name:        "help",
 			description: "Displays a help message",
 			callback:    commandHelp,
+		},
+		"map": {
+			name: "map",
+			description: "Explore the pokemon map forward by 20 locations",
+			callback: commandMapf,
+		},
+		"mapb": {
+			name: "mapb",
+			description: "Explore the pokemon map backward by 20 locations",
+			callback: commandMapb,
 		},
 	}
 }
