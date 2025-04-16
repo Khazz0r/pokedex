@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
 	"github.com/Khazz0r/pokedex/internal/pokeapi"
 )
 
