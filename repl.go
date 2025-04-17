@@ -29,8 +29,12 @@ func startRepl(cfg *config) {
 			continue
 		}
 
-		if command, ok := getCommandRegistry()[cleaned_input[0]]; ok {
-			err := command.callback(cfg)
+		if command, exists := getCommandRegistry()[cleaned_input[0]]; exists {
+			args := []string{}
+			if len(cleaned_input) > 1 {
+				args = cleaned_input[1:]
+			}
+			err := command.callback(cfg, args...)
 			if err != nil {
 				fmt.Println(err)
 			}
@@ -52,7 +56,7 @@ func cleanInput(text string) []string {
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*config) error
+	callback    func(*config, ...string) error
 }
 
 func getCommandRegistry() map[string]cliCommand {
@@ -69,13 +73,18 @@ func getCommandRegistry() map[string]cliCommand {
 		},
 		"map": {
 			name: "map",
-			description: "Explore the pokemon map forward by 20 locations",
+			description: "Traverse the pokemon map forward by 20 locations",
 			callback: commandMapf,
 		},
 		"mapb": {
 			name: "mapb",
-			description: "Explore the pokemon map backward by 20 locations",
+			description: "Traverse the pokemon map backward by 20 locations",
 			callback: commandMapb,
+		},
+		"explore": {
+			name: "explore <location_name>",
+			description: "Explore the pokemon in a location of your choice by its name",
+			callback: commandExplore,
 		},
 	}
 }

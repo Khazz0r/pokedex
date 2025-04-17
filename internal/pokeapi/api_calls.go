@@ -37,7 +37,7 @@ func (c *Client) ListLocations(pageURL *string) (PokeMap, error) {
 	if err != nil {
 		return PokeMap{}, err
 	}
-
+	
 	locationsResp := PokeMap{}
 	err = json.Unmarshal(data, &locationsResp)
 	if err != nil {
@@ -48,4 +48,45 @@ func (c *Client) ListLocations(pageURL *string) (PokeMap, error) {
 	c.cache.Add(url, data)
 
 	return locationsResp, nil
+}
+
+func (c *Client) ListPokemon(areaName string) (PokeLocation, error) {
+	url := baseURL + "/location-area/" + areaName
+
+	// If url of location is already in cache, use the cache instead of making a new request
+	if entry, exists := c.cache.Get(url); exists {
+		var locationResp PokeLocation
+		err := json.Unmarshal(entry, &locationResp)
+		if err != nil {
+			return PokeLocation{}, err
+		}
+		return locationResp, nil
+	}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return PokeLocation{}, err
+	}
+	
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return PokeLocation{}, err
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return PokeLocation{}, err
+	}
+
+	locationResp := PokeLocation{}
+	err = json.Unmarshal(data, &locationResp)
+	if err != nil {
+		return PokeLocation{}, err
+	}
+
+	// Add details of location to the cache
+	c.cache.Add(url, data)
+
+	return locationResp, nil
 }
