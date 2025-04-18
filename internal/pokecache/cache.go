@@ -16,6 +16,7 @@ type Cache struct {
 	Timeout time.Duration
 }
 
+// Create new cache for purposes of holding all data retrieved from API calls for a set amount of time
 func NewCache(interval time.Duration) *Cache {
 	c := &Cache{
 		Entries: make(map[string]CacheEntry),
@@ -46,6 +47,7 @@ func (c *Cache) Get(key string) ([]byte, bool) {
 	}
 }
 
+// Loop through and remove cache if it is older than the timeout period
 func (c *Cache) reapLoop() {
 	ticker := time.NewTicker(c.Timeout)
 	defer ticker.Stop()

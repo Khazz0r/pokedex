@@ -47,6 +47,7 @@ func startRepl(cfg *config) {
 	}
 }
 
+// Removes whitespace and sets user input to lowercase for consistency when taking commands as arguments
 func cleanInput(text string) []string {
 	textLower := strings.ToLower(text)
 	cleanedStrSlice := strings.Fields(textLower)
@@ -60,6 +61,7 @@ type cliCommand struct {
 	callback    func(*config, ...string) error
 }
 
+// All commands for CLI program are located here
 func getCommandRegistry() map[string]cliCommand {
 	return map[string]cliCommand{
 		"exit": {
@@ -69,33 +71,38 @@ func getCommandRegistry() map[string]cliCommand {
 		},
 		"help": {
 			name:        "help",
-			description: "Displays a help message",
+			description: "Displays a help message of all commands and what they do",
 			callback:    commandHelp,
 		},
 		"map": {
 			name: "map",
-			description: "Traverse the pokemon map forward by 20 locations",
+			description: "Traverse the Pokemon map forward by 20 locations",
 			callback: commandMapf,
 		},
 		"mapb": {
 			name: "mapb",
-			description: "Traverse the pokemon map backward by 20 locations",
+			description: "Traverse the Pokemon map backward by 20 locations",
 			callback: commandMapb,
 		},
 		"explore": {
 			name: "explore <location_name>",
-			description: "Explore the pokemon in a location of your choice by its name",
+			description: "Explore the Pokemon in a location of your choice by its name",
 			callback: commandExplore,
 		},
 		"catch": {
 			name: "catch <pokemon_name>",
-			description: "Catch a pokemon of your choice with a random chance based on its base experience",
+			description: "Catch a Pokemon of your choice with a random chance based on its base experience",
 			callback: commandCatch,
 		},
 		"inspect": {
 			name: "inspect <pokemon_name>",
-			description: "Inspect a pokemon that you've caught to see its stats",
+			description: "Inspect a Pokemon that you've caught to see its stats",
 			callback: commandInspect,
+		},
+		"pokedex": {
+			name: "pokedex",
+			description: "Show all of the caught Pokemon from your Pokedex",
+			callback: commandPokedex,
 		},
 	}
 }
