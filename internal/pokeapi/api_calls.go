@@ -11,7 +11,7 @@ func (c *Client) ListLocations(pageURL *string) (PokeMap, error) {
 	if pageURL != nil {
 		url = *pageURL
 	}
-	
+
 	// If url is already found in the cache, use the data in the cache over making a new request to API
 	if entry, exists := c.cache.Get(url); exists {
 		var locationResp PokeMap
@@ -37,7 +37,7 @@ func (c *Client) ListLocations(pageURL *string) (PokeMap, error) {
 	if err != nil {
 		return PokeMap{}, err
 	}
-	
+
 	locationsResp := PokeMap{}
 	err = json.Unmarshal(data, &locationsResp)
 	if err != nil {
@@ -67,7 +67,7 @@ func (c *Client) ListPokemon(areaName string) (PokeLocation, error) {
 	if err != nil {
 		return PokeLocation{}, err
 	}
-	
+
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return PokeLocation{}, err
@@ -89,4 +89,45 @@ func (c *Client) ListPokemon(areaName string) (PokeLocation, error) {
 	c.cache.Add(url, data)
 
 	return locationResp, nil
+}
+
+func (c *Client) GetPokemon(pokemonName string) (Pokemon, error) {
+	url := baseURL + "/pokemon/" + pokemonName
+
+	// If url of pokemon is already in cache, use the cache instead of making a new request
+	if entry, exists := c.cache.Get(url); exists {
+		var pokemonResponse Pokemon
+		err := json.Unmarshal(entry, &pokemonResponse)
+		if err != nil {
+			return Pokemon{}, err
+		}
+		return pokemonResponse, nil
+	}
+
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		return Pokemon{}, err
+	}
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return Pokemon{}, err
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return Pokemon{}, err
+	}
+
+	pokemonResp := Pokemon{}
+	err = json.Unmarshal(data, &pokemonResp)
+	if err != nil {
+		return Pokemon{}, err
+	}
+
+	// Add pokemon and its details to the cache
+	c.cache.Add(url, data)
+
+	return pokemonResp, nil
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"os"
 )
 
@@ -15,10 +16,10 @@ func commandExit(cfg *config, args ...string) error {
 func commandHelp(cfg *config, args ...string) error {
 	fmt.Println("\nWelcome to the Pokedex!")
 	fmt.Println("Usage:")
-	fmt.Println("")
 	for _, command := range getCommandRegistry() {
 		fmt.Printf("%s: %s\n", command.name, command.description)
 	}
+	fmt.Println("")
 	return nil
 }
 
@@ -60,15 +61,36 @@ func commandExplore(cfg *config, args ...string) error {
 	if len(args) != 1 {
 		return errors.New("you must provide a location name")
 	}
-	locationResp, err := cfg.pokeapiClient.ListPokemon(args[0])
+	location, err := cfg.pokeapiClient.ListPokemon(args[0])
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("Exploring %s...\n", locationResp.Name)
+	fmt.Printf("Exploring %s...\n", location.Name)
 	fmt.Println("Found these pokemon: ")
-	for _, pokemonEncounter := range locationResp.PokemonEncounters {
+	for _, pokemonEncounter := range location.PokemonEncounters {
 		fmt.Println(pokemonEncounter.Pokemon.Name)
 	}
+	return nil
+}
+
+func commandCatch(cfg *config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("you must provide a valid pokemon name")
+	}
+	pokemon, err := cfg.pokeapiClient.GetPokemon(args[0])
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("Throwing a Pokeball at %s...\n", pokemon.Name)
+	catchChance := rand.Intn(pokemon.BaseExperience + 100)
+	if catchChance < 100 {
+		fmt.Printf("%s was caught!\n", pokemon.Name)
+		cfg.caughtEntries[pokemon.Name] = pokemon
+	} else {
+		fmt.Printf("%s escaped!\n", pokemon.Name)
+	}
+
 	return nil
 }
