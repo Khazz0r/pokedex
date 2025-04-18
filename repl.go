@@ -92,5 +92,10 @@ func getCommandRegistry() map[string]cliCommand {
 			description: "Catch a pokemon of your choice with a random chance based on its base experience",
 			callback: commandCatch,
 		},
+		"inspect": {
+			name: "inspect <pokemon_name>",
+			description: "Inspect a pokemon that you've caught to see its stats",
+			callback: commandInspect,
+		},
 	}
 }

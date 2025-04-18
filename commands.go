@@ -94,3 +94,28 @@ func commandCatch(cfg *config, args ...string) error {
 
 	return nil
 }
+
+func commandInspect(cfg *config, args ...string) error {
+	if len(args) != 1 {
+		return errors.New("you must provide a valid pokemon name")
+	}
+
+	pokemonInfo, exists := cfg.caughtEntries[args[0]]
+	if exists {
+		fmt.Printf("Name: %s\n", pokemonInfo.Name)
+		fmt.Printf("Height: %d\n", pokemonInfo.Height)
+		fmt.Printf("Weight: %d\n", pokemonInfo.Weight)
+		fmt.Println("Stats:")
+		for i := 0; i < len(pokemonInfo.Stats); i++ {
+			fmt.Printf("  -%s: %d\n", pokemonInfo.Stats[i].Stat.Name, pokemonInfo.Stats[i].BaseStat)
+		}
+		fmt.Println("Types:")
+		for i := 0; i < len(pokemonInfo.Types); i++ {
+			fmt.Printf("  - %s\n", pokemonInfo.Types[i].Type.Name)
+		}
+	} else {
+		fmt.Printf("You have not caught %s yet, can't inspect\n", args[0])
+	}
+
+	return nil
+}
